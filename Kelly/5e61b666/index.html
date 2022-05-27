@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/../assets/duck.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/../assets/duck.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/../assets/duck.png">
+  <link rel="mask-icon" href="/../assets/duck.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ducktech.me","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="IEEE-CIS Credit fraud detection ¶1.動機 Motivations  小心網購！今年信用卡小額網路盜刷大增 26.5％ 今年前 5 月信用卡盜刷高達 6.2 億，多數來自蘋果、Google、亞馬遜 針對時事新聞，我有興趣建立一個信用卡檢測系統來識別欺詐性信用卡交易。這樣客戶就不會因為他們沒有購買的商品而被收取費用。 這個專案的好處:  有效且不費力地打擊欺詐 防止狡">
+<meta property="og:type" content="article">
+<meta property="og:title" content="credit-fraud">
+<meta property="og:url" content="https://ducktech.me/Kelly/5e61b666/index.html">
+<meta property="og:site_name" content="kelly">
+<meta property="og:description" content="IEEE-CIS Credit fraud detection ¶1.動機 Motivations  小心網購！今年信用卡小額網路盜刷大增 26.5％ 今年前 5 月信用卡盜刷高達 6.2 億，多數來自蘋果、Google、亞馬遜 針對時事新聞，我有興趣建立一個信用卡檢測系統來識別欺詐性信用卡交易。這樣客戶就不會因為他們沒有購買的商品而被收取費用。 這個專案的好處:  有效且不費力地打擊欺詐 防止狡">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://i.imgur.com/jNaGOrb.png">
+<meta property="og:image" content="https://i.imgur.com/V7F8HM4.png">
+<meta property="og:image" content="https://i.imgur.com/32NhjA3.png">
+<meta property="og:image" content="https://i.imgur.com/VULHyOf.png">
+<meta property="og:image" content="https://i.imgur.com/NHJ4U5g.png">
+<meta property="og:image" content="https://i.imgur.com/uVBrwJf.png">
+<meta property="og:image" content="https://i.imgur.com/T3DPv5e.png">
+<meta property="og:image" content="https://i.imgur.com/coNRaWv.png">
+<meta property="og:image" content="https://i.imgur.com/32WXrHx.png">
+<meta property="og:image" content="https://i.imgur.com/Us9yapV.png">
+<meta property="og:image" content="https://i.imgur.com/zY28TL6.png">
+<meta property="og:image" content="https://i.imgur.com/5ClrjU2.png">
+<meta property="og:image" content="https://i.imgur.com/eCrIrdn.png">
+<meta property="og:image" content="https://i.imgur.com/KRlLS1n.png">
+<meta property="og:image" content="https://i.imgur.com/AQWj0Ci.png">
+<meta property="og:image" content="https://i.imgur.com/VnFzfk2.png">
+<meta property="og:image" content="https://i.imgur.com/shSxo7R.png">
+<meta property="og:image" content="https://i.imgur.com/5roa5Jn.png">
+<meta property="og:image" content="https://i.imgur.com/pBYmfag.png">
+<meta property="og:image" content="https://i.imgur.com/LyxqdTN.png">
+<meta property="og:image" content="https://i.imgur.com/Y5bQ84r.png">
+<meta property="og:image" content="https://i.imgur.com/KjH5uk7.png">
+<meta property="og:image" content="https://i.imgur.com/BmxAMm7.png">
+<meta property="og:image" content="https://i.imgur.com/XQEngQ8.png">
+<meta property="og:image" content="https://i.imgur.com/1tG6oIU.png">
+<meta property="og:image" content="https://i.imgur.com/AxKEz6b.png">
+<meta property="og:image" content="https://i.imgur.com/33Jqg2a.png">
+<meta property="og:image" content="https://i.imgur.com/wRxKtUu.png">
+<meta property="og:image" content="https://i.imgur.com/74mBNVl.png">
+<meta property="og:image" content="https://i.imgur.com/aTO7IKj.png">
+<meta property="og:image" content="https://i.imgur.com/0EyZJ6u.png">
+<meta property="og:image" content="https://i.imgur.com/qllCqmL.png">
+<meta property="og:image" content="https://i.imgur.com/Gz5zCne.png">
+<meta property="og:image" content="https://i.imgur.com/sUN5fCf.png">
+<meta property="og:image" content="https://i.imgur.com/QrLskCe.png">
+<meta property="og:image" content="https://i.imgur.com/NEV4bwO.png">
+<meta property="og:image" content="https://i.imgur.com/D4S9cNb.png">
+<meta property="og:image" content="https://i.imgur.com/zP9GyWS.png">
+<meta property="og:image" content="https://i.imgur.com/WSQiNea.png">
+<meta property="og:image" content="https://i.imgur.com/GNu2J6G.png">
+<meta property="og:image" content="https://i.imgur.com/gLCpUCd.png">
+<meta property="og:image" content="https://i.imgur.com/PX1nSEB.png">
+<meta property="og:image" content="https://i.imgur.com/kSGmREb.png">
+<meta property="og:image" content="https://i.imgur.com/hwROm1O.png">
+<meta property="og:image" content="https://i.imgur.com/fh1OWi9.png">
+<meta property="article:published_time" content="2022-03-27T17:41:02.000Z">
+<meta property="article:modified_time" content="2022-05-27T08:11:42.161Z">
+<meta property="article:author" content="Kelly">
+<meta property="article:tag" content="binary classification">
+<meta property="article:tag" content="credit card fraud detection">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.imgur.com/jNaGOrb.png">
+
+<link rel="canonical" href="https://ducktech.me/Kelly/5e61b666/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>credit-fraud | kelly</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">kelly</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/duck-tech" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://ducktech.me/Kelly/5e61b666/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://i.imgur.com/Y9m0rZb.jpg">
+      <meta itemprop="name" content="Kelly">
+      <meta itemprop="description" content="A good heart goes a long way.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="kelly">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          credit-fraud
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2022-03-27 17:41:02" itemprop="dateCreated datePublished" datetime="2022-03-27T17:41:02+00:00">2022-03-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2022-05-27 08:11:42" itemprop="dateModified" datetime="2022-05-27T08:11:42+00:00">2022-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Analytics/" itemprop="url" rel="index"><span itemprop="name">Data Analytics</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Analytics/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/Kelly/5e61b666/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kelly/5e61b666/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1>IEEE-CIS Credit fraud detection</h1>
+<h2 id="1-動機-Motivations"><a class="header-anchor" href="#1-動機-Motivations">¶</a>1.動機 Motivations</h2>
+<p><img src="https://i.imgur.com/jNaGOrb.png" alt=""></p>
+<p><a target="_blank" rel="noopener" href="https://udn.com/news/story/7239/5444760">小心網購！今年信用卡小額網路盜刷大增 26.5％</a><br>
+<a target="_blank" rel="noopener" href="https://technews.tw/2021/08/18/ec-pay/">今年前 5 月信用卡盜刷高達 6.2 億，多數來自蘋果、Google、亞馬遜</a></p>
+<p>針對時事新聞，我有興趣建立一個<strong>信用卡檢測系統</strong>來識別欺詐性信用卡交易。這樣客戶就不會因為他們沒有購買的商品而被收取費用。</p>
+<p>這個專案的好處:</p>
+<ul>
+<li>有效且不費力地打擊欺詐</li>
+<li>防止狡猾的欺詐交易(手動定義的規則通常無法預料)</li>
+<li>為全球數百萬人提高欺詐交易警報的效力，幫助數十萬企業減少欺詐損失並增加收入</li>
+</ul>
+<h2 id="2-資料視覺化-Exploratory-data-analysis-EDA"><a class="header-anchor" href="#2-資料視覺化-Exploratory-data-analysis-EDA">¶</a>2.資料視覺化 Exploratory data analysis (EDA)</h2>
+<p>Data Source link: <a target="_blank" rel="noopener" href="https://www.kaggle.com/c/ieee-fraud-detection">IEEE-CIS Fraud Detection</a></p>
+<div class="note warning @">
+            <p>IEEE-CIS 與世界領先支付服務公司 Vesta Corporation 合作，尋求<strong>欺詐預測</strong>的最佳解決方案。Data 來自 Vesta 的真實電商交易，包含從設備類型到產品特徵等等資料。</p>
+          </div>
+<div class="note info @">
+            <ul><li>train_identity.csv</li><li>train_transaction.csv</li><li>test_identity.csv</li><li>test_transaction.csv</li></ul>
+          </div>
+<p>💡 Data Description</p>
+<p>本次有兩個資料集: 身分資訊資料集(identity)、交易資料集(transaction)</p>
+<table>
+<thead>
+<tr>
+<th>Transaction</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Variable</td>
+<td>Description</td>
+</tr>
+<tr>
+<td>TransactionID</td>
+<td>交易 ID</td>
+</tr>
+<tr>
+<td>TransactionDT</td>
+<td>來自給定參考日期時間的時間增量（不是實際時間戳）</td>
+</tr>
+<tr>
+<td>TransactionAMT</td>
+<td>以美元為單位的交易支付金額</td>
+</tr>
+<tr>
+<td>ProductCD</td>
+<td>產品代碼（每筆交易的產品）</td>
+</tr>
+<tr>
+<td>card1–6</td>
+<td>支付卡相關信息，如卡類型、國家等</td>
+</tr>
+<tr>
+<td>addr1</td>
+<td>帳單區域</td>
+</tr>
+<tr>
+<td>addr2</td>
+<td>帳單國家</td>
+</tr>
+<tr>
+<td>dist1 &amp; dist2</td>
+<td>一些距離信息，（不限於）帳單地址、郵寄地址、郵政編碼、IP 地址、電話區等之間的距離</td>
+</tr>
+<tr>
+<td>P_emaildomain</td>
+<td>購買者的電子郵件 domain</td>
+</tr>
+<tr>
+<td>R_emaildomain</td>
+<td>收件人的電子郵件 domain</td>
+</tr>
+<tr>
+<td>C1-C14</td>
+<td>計數，如發現有多少地址與支付卡關聯等，實際含義被屏蔽</td>
+</tr>
+<tr>
+<td>D1-D15</td>
+<td>時間增量，例如之前交易之間的天數等</td>
+</tr>
+<tr>
+<td>M1-M9</td>
+<td>匹配，如卡片上的名字和地址等</td>
+</tr>
+<tr>
+<td>Vxxx</td>
+<td>設計了豐富的功能，包括排名、計數和其他實體關係</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Identity</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Variable</td>
+<td>Description</td>
+</tr>
+<tr>
+<td>Transaction id</td>
+<td>交易 Id</td>
+</tr>
+<tr>
+<td>DeviceType</td>
+<td>用於交易的設備類型</td>
+</tr>
+<tr>
+<td>DeviceInfo</td>
+<td>有關所用設備的更多信息</td>
+</tr>
+<tr>
+<td>id 1-38</td>
+<td>網絡連接信息、瀏覽器信息等（id 12-38 為分類信息）</td>
+</tr>
+</tbody>
+</table>
+<p>💡 EDA</p>
+<h3 id="2-1-資料集觀察"><a class="header-anchor" href="#2-1-資料集觀察">¶</a>[2.1]資料集觀察</h3>
+<ol>
+<li>
+<p>合併交易與身分資料集，並印出測試與訓練資料集 shape</p>
+<p><img src="https://i.imgur.com/V7F8HM4.png" alt=""></p>
+</li>
+</ol>
+<div class="note info @">
+            <p>訓練資料有 590540 列資料，434 個欄位(有 isFraud)<br>測試資料有 506691 列資料，433 個欄位</p>
+          </div>
+<ol start="2">
+<li>
+<p>看訓練資料集 describe<br>
+<img src="https://i.imgur.com/32NhjA3.png" alt=""></p>
+<pre><code>&#123;% note info @%&#125;
+        觀察出 isFraud(=1) 約只有3.5%，可以看出這是一個**嚴重不平衡**的資料集。第二件事情，可以**看到有很多欄位具有缺失值**。
+        &#123;% endnote %&#125;
+</code></pre>
+</li>
+<li>
+<p>觀看缺失值</p>
+</li>
+</ol>
+<ul>
+<li>df_train<br>
+<img src="https://i.imgur.com/VULHyOf.png" alt=""></li>
+<li>df_test<br>
+<img src="https://i.imgur.com/NHJ4U5g.png" alt=""><br>
+:::info<br>
+我們可以看到像 id_21,id_22,id_23,id_24,id_25,id_26,id_27,id_07,id_08<br>
+這樣的列<strong>有超過 99% 的缺失值</strong>，後續可以考慮不要納入這些屬性。<br>
+:::</li>
+</ul>
+<hr>
+<h3 id="2-2-isFraud-Target"><a class="header-anchor" href="#2-2-isFraud-Target">¶</a>[2.2]isFraud(Target)</h3>
+<ol>
+<li>
+<p>觀察比例</p>
+<p><img src="https://i.imgur.com/uVBrwJf.png" alt=""></p>
+<p>:::info<br>
+正如前面 describe 描述，我們可以看到 Target<strong>嚴重不平衡</strong>，<br>
+這裡 96.5% 的交易不是欺詐，其餘 3.5% 的交易是欺詐。<br>
+因此我知道未來將選擇 ROC 曲線下的面積 (AUC) 作為我們 ML 問題的度量。<br>
+:::</p>
+<p>:::warning<br>
+考慮問題: 為什麼不能使用準確性作為衡量標準？<br>
+考慮這樣一個場景，我們有一個不平衡的數據集。例如，考慮信用卡欺詐檢測的情況，其中 98% 的分數為非欺詐，其餘 2% 的分數為欺詐。在這種情況下，即使我們將所有點預測為非欺詐，我們也將<strong>獲得 98% 的準確率</strong>。但實際上，情況並非如此。所以我們不能使用準確性作為衡量標準。<br>
+:::</p>
+</li>
+</ol>
+<hr>
+<h3 id="2-3-TransactionDT"><a class="header-anchor" href="#2-3-TransactionDT">¶</a>[2.3]TransactionDT</h3>
+<ol>
+<li>
+<p>描述-&gt;來自給定參考日期時間的時間增量（不是實際時間戳）。<br>
+(從 description 可以得知最小值是 86400，因此我們可以估計是以秒為單位。)</p>
+</li>
+<li>
+<p>沒有缺失值</p>
+</li>
+<li>
+<p>是否隨時間連續<br>
+在這裡，我們想檢查在訓練和測試中獲得的資料<strong>是否隨時間連續</strong>。這對於訓練-測試分割很重要。這意味著訓練資料應該來自更早的時期，而測試資料應該來自更晚的時期。<br>
+<img src="https://i.imgur.com/T3DPv5e.png" alt=""></p>
+<p>:::info<br>
+_ 兩者之間略有差距且訓練集來自較早的時間段，而測試數據來自較晚的時間段。這可能會<strong>影響待會使用的訓練驗證拆分或交叉驗證</strong>。<br>
+_ 某些時間的交易量超過 10000。<br>
+:::</p>
+</li>
+<li>
+<p>看看一周中不同日子以及不同時間的欺詐交易<br>
+<img src="https://i.imgur.com/coNRaWv.png" alt=""><br>
+<img src="https://i.imgur.com/32WXrHx.png" alt=""></p>
+<pre><code>:::info
+* 第 3 天的欺詐交易非常少
+* 第 7 個小時欺詐交易的百分比與其他時間相比較高
+
+:::
+</code></pre>
+</li>
+</ol>
+<h3 id="2-4-TransactionAmt"><a class="header-anchor" href="#2-4-TransactionAmt">¶</a>[2.4]TransactionAmt</h3>
+<ol>
+<li>描述-&gt;以<strong>美元</strong>為單位的交易支付金額</li>
+<li>沒有缺失值</li>
+<li>觀察每個小時平均值以及畫出詐欺曲線.<br>
+<img src="https://i.imgur.com/Us9yapV.png" alt=""></li>
+<li>觀察看看有沒有 outlier<br>
+<img src="https://i.imgur.com/zY28TL6.png" alt=""><br>
+:::info<br>
+可以觀察到訓練數據中有一個點的數量 &gt; 30000。選擇刪除異常值，因為它會影響我們的模型（尤其是基於距離的算法，如邏輯回歸、knn 等）的預測。<br>
+此外，像這樣的<strong>異常值會導致過度擬合問題</strong>。因此，後續決定刪除訓練集中大於 30,000 的值。<br>
+:::<br>
+4.1 更新 df_train<br>
+<img src="https://i.imgur.com/5ClrjU2.png" alt=""> 5.看分佈<br>
+<img src="https://i.imgur.com/eCrIrdn.png" alt=""><br>
+:::info<br>
+In train data Minimum transaction amount is 0.251 and maximum amount is 31937.391<br>
+In test data Minimum transaction amount is 0.018000000000000002 and maximum amount is 10270.0<br>
+:::<br>
+5.1 取 log<br>
+<img src="https://i.imgur.com/KRlLS1n.png" alt=""><br>
+<img src="https://i.imgur.com/AQWj0Ci.png" alt=""><br>
+:::info<br>
+Mean transaction amt for fraud is 4.3506 ie, 77.5264 dollars<br>
+Mean transaction amt for non-fraud is 4.3643 ie, 78.5978 dollars<br>
+Median transaction amt for fraud is 4.3175 ie, 75.0000 dollars<br>
+Median transaction amt for non-fraud is 4.2268 ie, 68.5000 dollars<br>
+:::<br>
+:::warning 1.欺詐交易的中位數略高。 2.同樣在欺詐交易中，我們有一個更好的正態分佈，它在鐘形曲線上很寬。它表明在特定時間段存在更多欺詐交易。</li>
+<li>‘LogTransactionAmt’ 大於 5.5（244 美元）且小於 3.3（27 美元）的交易似乎具有更高的欺詐機率。<br>
+:::</li>
+</ol>
+<hr>
+<h3 id="2-5-ProductCD"><a class="header-anchor" href="#2-5-ProductCD">¶</a>[2.5]ProductCD</h3>
+<ol>
+<li>描述-&gt;產品代碼（每筆交易的產品）</li>
+<li>沒有缺失值</li>
+<li>類別型資料，觀察其分布<br>
+<img src="https://i.imgur.com/VnFzfk2.png" alt=""><br>
+:::info<br>
+可以看到 W 的產品為最多，接下來進一步觀察，是不是在欺詐交易中，W 產品比例最多??<br>
+:::<br>
+3.1<br>
+<img src="https://i.imgur.com/shSxo7R.png" alt=""><br>
+:::info<br>
+結果發現只有大約 2% 的 Product W 交易是欺詐。<br>
+大約<strong>11.5%的 ProductC 是欺詐性交易</strong>，此外，<strong>大約 6%的 ProductS</strong>交易是欺詐。<br>
+:::</li>
+</ol>
+<hr>
+<h3 id="2-6-card1–6"><a class="header-anchor" href="#2-6-card1–6">¶</a>[2.6] card1–6</h3>
+<ol>
+<li>
+<p>描述-&gt;支付卡相關信息，如卡類型、國家等<br>
+<img src="https://i.imgur.com/5roa5Jn.png" alt=""></p>
+</li>
+<li>
+<p>觀察缺失值<br>
+<img src="https://i.imgur.com/pBYmfag.png" alt=""><br>
+:::info<br>
+待會要針對缺失值做處理<br>
+:::</p>
+</li>
+<li>
+<p>觀察 card1 - card6 unique value，哪些可能屬於類別型<br>
+<img src="https://i.imgur.com/LyxqdTN.png" alt=""></p>
+<pre><code>:::info
+Card 4、Card 6可能是類別型資料。
+:::
+</code></pre>
+</li>
+<li>
+<p>觀察連續型資料<br>
+<img src="https://i.imgur.com/Y5bQ84r.png" alt=""><br>
+:::info<br>
+可以觀察到欄位的數值範圍差很多，因此待會針對連續型資料要做正規化。<br>
+:::</p>
+</li>
+<li>
+<p>觀察相關性<br>
+<img src="https://i.imgur.com/KjH5uk7.png" alt=""><br>
+:::info<br>
+各自關係不大，card 3 和 isFraud 相較下有低關聯。<br>
+::: 6.觀察 card4 &amp; catd 6</p>
+</li>
+</ol>
+<ul>
+<li>
+<p>card4<br>
+<img src="https://i.imgur.com/BmxAMm7.png" alt=""></p>
+</li>
+<li>
+<p>card6<br>
+<img src="https://i.imgur.com/XQEngQ8.png" alt=""></p>
+<div class="note info @">
+            <ul><li>根據 card4 觀察到<strong>discover card</strong> 有最高詐欺案件，約 7.5%</li><li>根據 card6 觀察到<strong>credit card</strong> 存在更多欺詐交易的機會。它約佔所有交易的 6.5%。</li></ul>
+          </div>
+</li>
+</ul>
+<hr>
+<h3 id="2-7-P-emaildomain-R-emaildomain"><a class="header-anchor" href="#2-7-P-emaildomain-R-emaildomain">¶</a>[2.7] P_emaildomain &amp; R_emaildomain</h3>
+<ol>
+<li>描述-&gt;購買者的電子郵件 domain 和收件者的電子郵件 domain</li>
+<li>觀察缺失值<br>
+<img src="https://i.imgur.com/1tG6oIU.png" alt=""><br>
+:::info<br>
+各有一些缺失值，不過不是每筆交易都會要求提供 mail，好像也還可以理解，那進一步觀察哪類的電子郵件欺詐交易案件最多?<br>
+:::</li>
+<li>觀察 P_emaildomain 與 isFraud 的關係<br>
+<img src="https://i.imgur.com/AxKEz6b.png" alt=""><br>
+:::info * 在買方 email domain，大多數郵件來自 <a target="_blank" rel="noopener" href="http://gmail.com">gmail.com</a>，其中更多的欺詐交易來自<strong><a target="_blank" rel="noopener" href="http://protonmail.com">protonmail.com</a></strong>，超過 40%。<br>
+:::</li>
+<li>觀察 R*emaildomain 與 isFraud 的關係<br>
+<img src="https://i.imgur.com/33Jqg2a.png" alt=""><br>
+:::info
+<ul>
+<li>在收件者電子郵件域中，大多數郵件來自 <a target="_blank" rel="noopener" href="http://gmail.com">gmail.com</a><br>
+_ 其中更多的欺詐交易來自<strong><a target="_blank" rel="noopener" href="http://protonmail.com">protonmail.com</a></strong>，超過 90%，這是一個嚴重的問題。<br>
+根據上述 3.的情況，可以得知更多的詐欺交易來自<strong><a target="_blank" rel="noopener" href="http://protonmail.com">protonmail.com</a></strong><br>
+:::</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3 id="2-8-DeviceType"><a class="header-anchor" href="#2-8-DeviceType">¶</a>[2.8] DeviceType</h3>
+<ol>
+<li>
+<p>描述-&gt;用於交易的設備類型</p>
+</li>
+<li>
+<p>有無缺失值<br>
+<img src="https://i.imgur.com/wRxKtUu.png" alt=""><br>
+:::info<br>
+有些缺失值，後續可能須做處理<br>
+:::</p>
+</li>
+<li>
+<p>觀察資料與 isFraud 的關係<br>
+<img src="https://i.imgur.com/74mBNVl.png" alt=""></p>
+<pre><code>:::info
+觀察到欺詐交易大多是在mobile上進行的，大約有 10% 左右，而桌面交易中只有 6.2% 的欺詐交易。
+:::
+</code></pre>
+</li>
+</ol>
+<hr>
+<h3 id="2-9-Device-Info"><a class="header-anchor" href="#2-9-Device-Info">¶</a>[2.9] Device Info</h3>
+<ol>
+<li>
+<p>描述-&gt;有關所用設備的更多信息</p>
+</li>
+<li>
+<p>有無缺失值<br>
+<img src="https://i.imgur.com/aTO7IKj.png" alt=""></p>
+<pre><code>:::info
+有些缺失值，後續可能須做處理
+:::
+</code></pre>
+</li>
+<li>
+<p>觀察資料與 isFraud 的關係<br>
+<img src="https://i.imgur.com/0EyZJ6u.png" alt=""></p>
+<pre><code>![](https://i.imgur.com/F4koEKn.png)
+:::info
+* 不同設備訊息有1786個
+* 可以觀察到約 49 個設備信息有機會被欺詐交易 &gt; 90%
+:::
+</code></pre>
+</li>
+</ol>
+<hr>
+<h2 id="3-重述問題-Problem-formulation"><a class="header-anchor" href="#3-重述問題-Problem-formulation">¶</a>3.重述問題 Problem formulation</h2>
+<hr>
+<h3 id="Problem-formulation"><a class="header-anchor" href="#Problem-formulation">¶</a>Problem formulation</h3>
+<p>This is a supervised learning problem: we would like to use $x$ to predict the binary variable $y$.</p>
+<p>We sould like to build a model to predict $y$ from $x=(x_1,\ldots,x_p)$ with $p=433$.$$Y =\left{\begin{array}{ll}1,&amp;\mbox{is fraudulent},\0,&amp;\mbox{is not fraudulent}\end{array}\right.$$</p>
+<h3 id="Measures-for-comparisons"><a class="header-anchor" href="#Measures-for-comparisons">¶</a>Measures for comparisons</h3>
+<p>首先考慮 75%-25% 的分割來獲得訓練和測試數據。<br>
+對於訓練和測試數據，輸出準確率、準確率、召回率、f1 分數和 AUC 以進行模型比較，另外<strong>因為此次資料集是不平衡的資料，因此看 AUC 較為準確</strong>!</p>
+<h2 id="4-資料分析-Data-analysis"><a class="header-anchor" href="#4-資料分析-Data-analysis">¶</a>4.資料分析 Data analysis</h2>
+<h3 id="資料前處理"><a class="header-anchor" href="#資料前處理">¶</a>資料前處理</h3>
+<ol>
+<li>準備資料</li>
+</ol>
+<ul>
+<li>X_train -&gt; 去掉 “isFraud” 問題,y_train -&gt; &quot;isFraud&quot;欄位</li>
+<li>針對類別型資料,全部做 label-encoding</li>
+<li>針對數值型資料,做正規化</li>
+</ul>
+<ol start="2">
+<li>
+<p>將 df_train 切割成訓練集與驗證集</p>
+<p><img src="https://i.imgur.com/qllCqmL.png" alt=""><br>
+:::info<br>
+訓練集前 75%,驗證集 25%<br>
+:::</p>
+</li>
+</ol>
+<hr>
+<h3 id="Benchmark-Logistic-Regression"><a class="header-anchor" href="#Benchmark-Logistic-Regression">¶</a>Benchmark Logistic Regression</h3>
+<ul>
+<li>
+<p>In-sample results confusion matrix<br>
+<img src="https://i.imgur.com/Gz5zCne.png" alt=""></p>
+</li>
+<li>
+<p>out-of-sample results confusion matrix<br>
+75% 訓練集, 25%驗證集<br>
+<img src="https://i.imgur.com/sUN5fCf.png" alt=""></p>
+</li>
+</ul>
+<h3 id="特徵工程四步驟"><a class="header-anchor" href="#特徵工程四步驟">¶</a>特徵工程四步驟</h3>
+<ol>
+<li>
+<p>調整參數 logistic Regression</p>
+<blockquote>
+<p>solver = ‘liblinear’,<br>
+class_weight=‘balanced’,<br>
+penalty=‘l1’,<br>
+n_jobs=-1</p>
+</blockquote>
+</li>
+<li>
+<p>去除缺失值<br>
+<img src="https://i.imgur.com/QrLskCe.png" alt=""><br>
+:::info<br>
+根據 EDA，有 12 個欄位缺失職&gt;90%，直接去除掉這些欄位。<br>
+包括（id_21,id_22,id_23,id_24,id_25,id_26,id_27,id_07,id_08,id_18,dist2,D7）<br>
+:::</p>
+</li>
+<li>
+<p>欄位取 log 值[TransactionAmt]<br>
+<img src="https://i.imgur.com/NEV4bwO.png" alt=""><br>
+:::info<br>
+根據 EDA，TransactionAmt 取 log 值來當作新的欄位<br>
+:::</p>
+</li>
+<li>
+<p>PCA[V1-V339]<br>
+<img src="https://i.imgur.com/D4S9cNb.png" alt=""><br>
+:::info<br>
+將Ｖ 1-V339 做 PCA，thresh = 0.7，最後剩下 4 個欄位。<br>
+:::</p>
+</li>
+</ol>
+<h3 id="Logistic-Regression"><a class="header-anchor" href="#Logistic-Regression">¶</a>Logistic Regression</h3>
+<ul>
+<li>
+<p>In-sample results confusion matrix<br>
+<img src="https://i.imgur.com/zP9GyWS.png" alt=""></p>
+</li>
+<li>
+<p>out-of-sample results confusion matrix<br>
+75%訓練集,25%驗證集<br>
+<img src="https://i.imgur.com/WSQiNea.png" alt=""></p>
+</li>
+</ul>
+<h3 id="KNN"><a class="header-anchor" href="#KNN">¶</a>KNN</h3>
+<ul>
+<li>
+<p>In-sample results confusion matrix<br>
+<img src="https://i.imgur.com/GNu2J6G.png" alt=""></p>
+</li>
+<li>
+<p>out-of-sample results confusion matrix<br>
+75%訓練集,25%驗證集<br>
+<img src="https://i.imgur.com/gLCpUCd.png" alt=""></p>
+</li>
+</ul>
+<h3 id="Random-Forest"><a class="header-anchor" href="#Random-Forest">¶</a>Random Forest</h3>
+<ul>
+<li>
+<p>In-sample results confusion matrix<br>
+<img src="https://i.imgur.com/PX1nSEB.png" alt=""></p>
+</li>
+<li>
+<p>out-of-sample results confusion matrix<br>
+75%訓練集,25%驗證集<br>
+<img src="https://i.imgur.com/kSGmREb.png" alt=""></p>
+</li>
+</ul>
+<h3 id="XGBoost"><a class="header-anchor" href="#XGBoost">¶</a>XGBoost</h3>
+<ul>
+<li>
+<p>In-sample results confusion matrix<br>
+<img src="https://i.imgur.com/hwROm1O.png" alt=""></p>
+</li>
+<li>
+<p>out-of-sample results confusion matrix<br>
+75%訓練集,25%驗證集<br>
+<img src="https://i.imgur.com/fh1OWi9.png" alt=""></p>
+</li>
+</ul>
+<h3 id="Results"><a class="header-anchor" href="#Results">¶</a>Results</h3>
+<h4 id="In-sample-results"><a class="header-anchor" href="#In-sample-results">¶</a>In-sample results</h4>
+<table>
+<thead>
+<tr>
+<th>Measures</th>
+<th>BenchMark</th>
+<th>Logistic Regression</th>
+<th>KNN</th>
+<th>RandomForest</th>
+<th>XGBoost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC</td>
+<td>0.5457</td>
+<td>0.8701</td>
+<td>0.9708</td>
+<td>🏆 1.</td>
+<td>0.9999</td>
+</tr>
+<tr>
+<td>Accurracy</td>
+<td>0.9649</td>
+<td>0.8275</td>
+<td>0.97</td>
+<td>🏆 1.</td>
+<td>0.9978</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>0.0</td>
+<td>o.1388</td>
+<td>0.7821</td>
+<td>🏆 1.</td>
+<td>0.9997</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>0.0</td>
+<td>0.7512</td>
+<td>0.2021</td>
+<td>0.9994</td>
+<td>0.9386</td>
+</tr>
+<tr>
+<td>F1-score</td>
+<td>0.0</td>
+<td>0.2343</td>
+<td>0.3212</td>
+<td>0.9997</td>
+<td>0.9682</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Out-of-sample-comparisons"><a class="header-anchor" href="#Out-of-sample-comparisons">¶</a>Out-of-sample comparisons</h4>
+<p>We consider a simple 75%-25% split on the data. In the test data, we have</p>
+<table>
+<thead>
+<tr>
+<th>Measures</th>
+<th>BenchMark</th>
+<th>Logistic Regression</th>
+<th>KNN</th>
+<th>RandomForest</th>
+<th>XGBoost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC</td>
+<td>0.5322</td>
+<td>0.8552</td>
+<td>0.824</td>
+<td>0.9836</td>
+<td>0.9745</td>
+</tr>
+<tr>
+<td>Accurracy</td>
+<td>0.9655</td>
+<td>0.7831</td>
+<td>0.9663</td>
+<td>0.9911</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>0.0</td>
+<td>0.1227</td>
+<td>0.786</td>
+<td>0.9749</td>
+<td>🏆 0.9802</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>0.0</td>
+<td>0.7686</td>
+<td>0.1524</td>
+<td>0.7866</td>
+<td>0.7506</td>
+</tr>
+<tr>
+<td>F1-score</td>
+<td>0.0</td>
+<td>0.2116</td>
+<td>0.2553</td>
+<td>0.8707</td>
+<td>0.8502</td>
+</tr>
+</tbody>
+</table>
+<h2 id="5-結論-Conclusion"><a class="header-anchor" href="#5-結論-Conclusion">¶</a>5. 結論 Conclusion</h2>
+<ol>
+<li>這次資料特色是資料量大（約 60 萬筆）、資料嚴重不平衡，因此在測量指標上要特別注意，以使用 AUC 較為客觀</li>
+<li>整體來說，模型取用 RandomFores,特徵工程將資料集去除缺失值&gt;90%欄位以及針對 TransactionAmt 取 log 值表現最佳。</li>
+</ol>
+<h3 id="未來發展-Future-Works"><a class="header-anchor" href="#未來發展-Future-Works">¶</a>未來發展 Future Works</h3>
+<p>在這次專案上，因為資料量大，因此跑模型起來較吃力，未來發展可以基於本篇方法，使用其他的機器學習模型以及做其他的特徵工程。</p>
+<h2 id="6-參考資料-Reference"><a class="header-anchor" href="#6-參考資料-Reference">¶</a>6. 參考資料 Reference</h2>
+<p><a target="_blank" rel="noopener" href="https://ithelp.ithome.com.tw/articles/10229049">淺談機器學習的效能衡量指標</a><br>
+<a target="_blank" rel="noopener" href="https://towardsdatascience.com/ieee-cis-fraud-detection-top-5-solution-5488fc66e95f">IEEE-CIS Fraud Detection - Top 5% Solution</a><br>
+<a target="_blank" rel="noopener" href="https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/671529/">機器學習 053-數據降維絕招-PCA 和核 PCA</a></p>
+<h2 id="7-資料與程式存放-Data-and-code"><a class="header-anchor" href="#7-資料與程式存放-Data-and-code">¶</a>7. 資料與程式存放 Data and code</h2>
+<p><a target="_blank" rel="noopener" href="https://www.kaggle.com/c/ieee-fraud-detection">IEEE-CIS Fraud Detection Data</a><br>
+<a target="_blank" rel="noopener" href="https://colab.research.google.com/drive/1mDs8M9CZDIhtg3IZM91tohdEemxXohK8">Code</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/binary-classification/" rel="tag"># binary classification</a>
+              <a href="/tags/credit-card-fraud-detection/" rel="tag"># credit card fraud detection</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Kelly/aab513d1/" rel="prev" title="Sentimental Analysis On Amazon’s Alexa Reviews">
+      <i class="fa fa-chevron-left"></i> Sentimental Analysis On Amazon’s Alexa Reviews
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Kelly/ba8ea84b/" rel="next" title="[雲原生軟體開發]TESTING & DEPLOYMENT">
+      [雲原生軟體開發]TESTING & DEPLOYMENT <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-number">1.</span> <span class="nav-text">IEEE-CIS Credit fraud detection</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%8B%95%E6%A9%9F-Motivations"><span class="nav-number">1.1.</span> <span class="nav-text">1.動機 Motivations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E8%B3%87%E6%96%99%E8%A6%96%E8%A6%BA%E5%8C%96-Exploratory-data-analysis-EDA"><span class="nav-number">1.2.</span> <span class="nav-text">2.資料視覺化 Exploratory data analysis (EDA)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E8%B3%87%E6%96%99%E9%9B%86%E8%A7%80%E5%AF%9F"><span class="nav-number">1.2.1.</span> <span class="nav-text">[2.1]資料集觀察</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-isFraud-Target"><span class="nav-number">1.2.2.</span> <span class="nav-text">[2.2]isFraud(Target)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-TransactionDT"><span class="nav-number">1.2.3.</span> <span class="nav-text">[2.3]TransactionDT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-TransactionAmt"><span class="nav-number">1.2.4.</span> <span class="nav-text">[2.4]TransactionAmt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-ProductCD"><span class="nav-number">1.2.5.</span> <span class="nav-text">[2.5]ProductCD</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-card1%E2%80%936"><span class="nav-number">1.2.6.</span> <span class="nav-text">[2.6] card1–6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-P-emaildomain-R-emaildomain"><span class="nav-number">1.2.7.</span> <span class="nav-text">[2.7] P_emaildomain &amp; R_emaildomain</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-8-DeviceType"><span class="nav-number">1.2.8.</span> <span class="nav-text">[2.8] DeviceType</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-9-Device-Info"><span class="nav-number">1.2.9.</span> <span class="nav-text">[2.9] Device Info</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%87%8D%E8%BF%B0%E5%95%8F%E9%A1%8C-Problem-formulation"><span class="nav-number">1.3.</span> <span class="nav-text">3.重述問題 Problem formulation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem-formulation"><span class="nav-number">1.3.1.</span> <span class="nav-text">Problem formulation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Measures-for-comparisons"><span class="nav-number">1.3.2.</span> <span class="nav-text">Measures for comparisons</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E8%B3%87%E6%96%99%E5%88%86%E6%9E%90-Data-analysis"><span class="nav-number">1.4.</span> <span class="nav-text">4.資料分析 Data analysis</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E5%89%8D%E8%99%95%E7%90%86"><span class="nav-number">1.4.1.</span> <span class="nav-text">資料前處理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Benchmark-Logistic-Regression"><span class="nav-number">1.4.2.</span> <span class="nav-text">Benchmark Logistic Regression</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%B5%E5%B7%A5%E7%A8%8B%E5%9B%9B%E6%AD%A5%E9%A9%9F"><span class="nav-number">1.4.3.</span> <span class="nav-text">特徵工程四步驟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Logistic-Regression"><span class="nav-number">1.4.4.</span> <span class="nav-text">Logistic Regression</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KNN"><span class="nav-number">1.4.5.</span> <span class="nav-text">KNN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Random-Forest"><span class="nav-number">1.4.6.</span> <span class="nav-text">Random Forest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XGBoost"><span class="nav-number">1.4.7.</span> <span class="nav-text">XGBoost</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Results"><span class="nav-number">1.4.8.</span> <span class="nav-text">Results</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#In-sample-results"><span class="nav-number">1.4.8.1.</span> <span class="nav-text">In-sample results</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Out-of-sample-comparisons"><span class="nav-number">1.4.8.2.</span> <span class="nav-text">Out-of-sample comparisons</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E7%B5%90%E8%AB%96-Conclusion"><span class="nav-number">1.5.</span> <span class="nav-text">5. 結論 Conclusion</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AA%E4%BE%86%E7%99%BC%E5%B1%95-Future-Works"><span class="nav-number">1.5.1.</span> <span class="nav-text">未來發展 Future Works</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E5%8F%83%E8%80%83%E8%B3%87%E6%96%99-Reference"><span class="nav-number">1.6.</span> <span class="nav-text">6. 參考資料 Reference</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E8%B3%87%E6%96%99%E8%88%87%E7%A8%8B%E5%BC%8F%E5%AD%98%E6%94%BE-Data-and-code"><span class="nav-number">1.7.</span> <span class="nav-text">7. 資料與程式存放 Data and code</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kelly"
+      src="https://i.imgur.com/Y9m0rZb.jpg">
+  <p class="site-author-name" itemprop="name">Kelly</p>
+  <div class="site-description" itemprop="description">A good heart goes a long way.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kelly</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://https-duck-tech-github-io.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://ducktech.me/Kelly/5e61b666/";
+    this.page.identifier = "Kelly/5e61b666/";
+    this.page.title = "credit-fraud";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://https-duck-tech-github-io.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

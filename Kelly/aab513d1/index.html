@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/../assets/duck.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/../assets/duck.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/../assets/duck.png">
+  <link rel="mask-icon" href="/../assets/duck.png" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ducktech.me","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="¶Summary 情感分析（Sentiment Analysis）是挖掘文本數據（如評論、陳述）並對其背後的情緒進行預測之過程。隨著電子商務發展漸趨成熟且相關資料的蒐集越加容易，現今不少企業開始採用情感分析來監測自家產品受歡迎的程度，其中「顧客的回饋」，如文字評論、產品評分等等，是企業進行情感分析之關鍵。 此報告期望透過程式實作，對 Amazon Alexa（亞馬遜公司推出的一款智慧型助理）這項產">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sentimental Analysis On Amazon’s Alexa Reviews">
+<meta property="og:url" content="https://ducktech.me/Kelly/aab513d1/index.html">
+<meta property="og:site_name" content="kelly">
+<meta property="og:description" content="¶Summary 情感分析（Sentiment Analysis）是挖掘文本數據（如評論、陳述）並對其背後的情緒進行預測之過程。隨著電子商務發展漸趨成熟且相關資料的蒐集越加容易，現今不少企業開始採用情感分析來監測自家產品受歡迎的程度，其中「顧客的回饋」，如文字評論、產品評分等等，是企業進行情感分析之關鍵。 此報告期望透過程式實作，對 Amazon Alexa（亞馬遜公司推出的一款智慧型助理）這項產">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://i.imgur.com/uaN37cW.png">
+<meta property="og:image" content="https://i.imgur.com/KhK0xKd.png">
+<meta property="og:image" content="https://i.imgur.com/BsUDENG.png">
+<meta property="og:image" content="https://i.imgur.com/r1NKomq.png">
+<meta property="og:image" content="https://i.imgur.com/J66vu58.png">
+<meta property="og:image" content="https://i.imgur.com/4m9mtQq.png">
+<meta property="og:image" content="https://i.imgur.com/Y8Y8obz.png">
+<meta property="og:image" content="https://i.imgur.com/dAGbJQN.png">
+<meta property="og:image" content="https://i.imgur.com/tInNPFU.png">
+<meta property="og:image" content="https://i.imgur.com/NKxaRdE.png">
+<meta property="og:image" content="https://i.imgur.com/qFOVGOC.png">
+<meta property="og:image" content="https://i.imgur.com/b9BtL13.png">
+<meta property="og:image" content="https://i.imgur.com/qPmvsB5.png">
+<meta property="og:image" content="https://i.imgur.com/s2W4J36.png">
+<meta property="og:image" content="https://i.imgur.com/IKSdNnN.png">
+<meta property="article:published_time" content="2022-03-27T17:30:02.000Z">
+<meta property="article:modified_time" content="2022-05-27T08:11:42.157Z">
+<meta property="article:author" content="Kelly">
+<meta property="article:tag" content="Sentimental Analysis On Amazon’s Alexa Reviews">
+<meta property="article:tag" content="binary classification">
+<meta property="article:tag" content="NLP">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.imgur.com/uaN37cW.png">
+
+<link rel="canonical" href="https://ducktech.me/Kelly/aab513d1/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-TW'
+  };
+</script>
+
+  <title>Sentimental Analysis On Amazon’s Alexa Reviews | kelly</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切換導航欄">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">kelly</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首頁</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>文章</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>關於</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>標籤</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分類</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/duck-tech" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-TW">
+    <link itemprop="mainEntityOfPage" href="https://ducktech.me/Kelly/aab513d1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://i.imgur.com/Y9m0rZb.jpg">
+      <meta itemprop="name" content="Kelly">
+      <meta itemprop="description" content="A good heart goes a long way.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="kelly">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Sentimental Analysis On Amazon’s Alexa Reviews
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">發表於</span>
+
+              <time title="創建時間：2022-03-27 17:30:02" itemprop="dateCreated datePublished" datetime="2022-03-27T17:30:02+00:00">2022-03-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新於</span>
+                <time title="修改時間：2022-05-27 08:11:42" itemprop="dateModified" datetime="2022-05-27T08:11:42+00:00">2022-05-27</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分類於</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Analytics/" itemprop="url" rel="index"><span itemprop="name">Data Analytics</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Data-Analytics/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/Kelly/aab513d1/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="Kelly/aab513d1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Summary"><a class="header-anchor" href="#Summary">¶</a>Summary</h2>
+<p>情感分析（Sentiment Analysis）是挖掘文本數據（如評論、陳述）並對其背後的情緒進行預測之過程。隨著電子商務發展漸趨成熟且相關資料的蒐集越加容易，現今不少企業開始採用情感分析來監測自家產品受歡迎的程度，其中「顧客的回饋」，如文字評論、產品評分等等，是企業進行情感分析之關鍵。<br>
+此報告期望透過程式實作，對 Amazon Alexa（亞馬遜公司推出的一款智慧型助理）這項產品之顧客回饋進行深入的情感分析。本組採用的模型包含：樸素貝式分類器（Naive Bayes Classifier）、邏輯斯迴歸（Logistic Regression）、決策樹（Decision Tree）、隨機森林（Random Forest）、XGBoost、長短期記憶模型（LSTM），進一步比較各模型之預測準度(Accuracy)、精確度(Precision)、召回率(Recall)、F1-Score 以及 ROC Curve 下的面積(AUC)。</p>
+<p>關鍵字：Sentiment Analysis、Natural Language Processing、Machine Learning、Deep Learning、Unbalanced Dataset、Amazon Alexa</p>
+<h2 id="動機"><a class="header-anchor" href="#動機">¶</a>動機</h2>
+<p>現今，許多電子商務企業、社群網站，如亞馬遜的顧客回饋、各種實體店家的 Google 評論等，生成了大量「以評論形式」出現的數據。若手動審查所有文字評論將會是一項耗時且繁瑣的任務。因此，設計自動情感分析的機器學習演算法，將可使買賣雙方甚至潛在顧客，都能對自己的決策有更精確的參考依據。<br>
+機器學習算法有助於從大量的數據中提取有用信息並幫助做出決策。本組期透過機器學習算法，自動分析顧客對 Amazon Alexa 及相關產品的評論與回饋，並將其分類為正面或負面。如此一來，本組便可快速且有效率的對大量數據進行處理，並判斷評論者對實體產品的情感和看法。</p>
+<h2 id="資料集敘述"><a class="header-anchor" href="#資料集敘述">¶</a>資料集敘述</h2>
+<p>本組自 Kaggle 取得 Amazon Alexa 相關產品的顧客回饋資料集。首先，本組對原始資料集進行探索式資料分析(Exploratory Data Analysis，簡稱 EDA)，觀察到此資料集包含 5 種屬性共 3150 筆資料，且無任何缺失值。<br>
+屬性資料</p>
+<ul>
+<li>Rating：評價，1~5 顆星。</li>
+<li>Date：日期。</li>
+<li>Variation：產品型號。</li>
+<li>Verified_Reviews：顧客評論，以文字形式呈現。</li>
+<li>Feedback：回饋，1 為正面回饋；0 為負面回饋。</li>
+</ul>
+<h3 id="3-1-Feedback-Rating-的處理"><a class="header-anchor" href="#3-1-Feedback-Rating-的處理">¶</a>3.1 Feedback &amp; Rating 的處理</h3>
+<p>由於預測模型的主要目的在於判斷顧客評論會被歸類在正面回饋或負面回饋，即 Feedback 屬性是 1 還是 0，因此先觀察此屬性的原始分佈。<br>
+<img src="https://i.imgur.com/uaN37cW.png" alt=""></p>
+<p>&lt;圖一、屬性 Feedback 之原始分佈&gt;</p>
+<p>從圖一可以觀察到，屬性 Feedback 的原始分佈有著極度不平衡的現象，多數顧客對 Amazon Alexa 相關產品皆給予正面的評價。因此後續做模型評估時，本組將以 ROC 曲線下的面積 AUC 為主要判斷依據。<br>
+接著也可以透過圓餅圖觀察不同 Rating 出現之頻率(見圖二)，可以發現給予產品高評價(3~5 顆星)的顧客確實占整份資料集的多數。</p>
+<p><img src="https://i.imgur.com/KhK0xKd.png" alt=""><br>
+&lt;圖二、屬性 Rating 之原始分佈&gt;</p>
+<h3 id="3-2-Variation-的處理"><a class="header-anchor" href="#3-2-Variation-的處理">¶</a>3.2 Variation 的處理</h3>
+<p>實務上有可能出現不同型號產品評價兩極的情境，因此本組也針對屬性 Variation 作圖，觀察是否發生某一個型號評價特別好或特別差的現象(見圖三)。如圖三所示，可以觀察到不同產品型號的銷售量有差異，但所有型號的平均評分均高於 4，因此可推斷 Variation 不會影響客戶對產品的滿意度。</p>
+<p><img src="https://i.imgur.com/BsUDENG.png" alt=""><br>
+&lt;圖三、不同型號產品平均 Rating(左側軸)與出現次數(右側軸)&gt;</p>
+<h3 id="3-3-Length-的處理"><a class="header-anchor" href="#3-3-Length-的處理">¶</a>3.3 Length 的處理</h3>
+<p>一般來說，較長的評論可能更能反映顧客之情緒，因為客戶會詳細解釋他給出評級的原因。因此，檢查數據集中的評論長度也非常重要，故增加 Length 欄位加以分析。圖四為顧客評論的長度分佈，當中最短的評論有 1 個字符、最長的評論有 2851 個字符、評論的平均長度為 132 個字符。</p>
+<p><img src="https://i.imgur.com/r1NKomq.png" alt=""><br>
+&lt;圖四、顧客評論的長度分佈&gt;</p>
+<p>接著本組觀察屬性 Feedback 與評論長度(Length)之間的關係，發現當顧客給予正面回饋時(Feedback = 1)，評論之平均長度為 124 個字符；當顧客給予負面回饋時(Feedback = 0)，評論之平均長度則為 215 個字符。由此可推斷對產品不滿意的人傾向於寫更長的評論。可能原因為正面評價更容易撰寫，因為顧客大都用“這是一款很棒的產品”去表達自身感受。然而在撰寫負面評論時，顧客或許會想解釋其對產品不滿意的原因，這需要更長的篇幅去描述。</p>
+<h3 id="3-4-Verified-Review-的處理"><a class="header-anchor" href="#3-4-Verified-Review-的處理">¶</a>3.4 Verified_Review 的處理</h3>
+<p>進行情緒分析，相當重要的一步即尋找資料集中那些最常出現的單字。因此本組利用 WordCloud 繪出所有 Verified_Review 裡出現頻率最高的用字，結果如圖五所示，可以發現正面的用詞更為普遍。</p>
+<p><img src="https://i.imgur.com/J66vu58.png" alt=""><br>
+圖五、所有顧客評論所呈現之文字雲</p>
+<p>為觀察不同種評論常見的用詞是否有所差異，本組也將正面回饋的 Verified_Review 以及負面回饋的 Verified_Review 分開製作文字雲，結果可見圖六、圖七。</p>
+<p><img src="https://i.imgur.com/4m9mtQq.png" alt=""><br>
+圖六、正面顧客評論所呈現之文字雲</p>
+<p><img src="https://i.imgur.com/Y8Y8obz.png" alt=""><br>
+圖七、負面顧客評論所呈現之文字雲</p>
+<h2 id="分析工具"><a class="header-anchor" href="#分析工具">¶</a>分析工具</h2>
+<ul>
+<li>Exploratory Data Analysis<br>
+Seaborn<br>
+Matplotlib<br>
+WordCloud</li>
+<li>Data Preprocessing：<br>
+NLTK<br>
+Model Construction &amp; Evaluation：<br>
+Scikit-Learn<br>
+NLP：keras</li>
+</ul>
+<p>在分析工具上，本組先使用 Matplotlib 及 Seaborn 來進行視覺化分析。Matplotlib 是 Python 的視覺化套件，可用於繪製簡易的折線圖、圓餅圖、直方圖…等，而 Seaborn 則能夠美化圖形，有助於分析者掌握數據分布比例，加速對數據的理解進而做出初步推斷，另外因本組期許對評論進行文字情感分析，透過 WordCloud 來抓取評論中出現頻率較高的單詞。<br>
+對數據有初步瞭解後，為避免&quot;garbage in garbage out&quot;，我們需要使用自然語言處理工具來清理資料，本組採用 NLTK 來對評論進行斷句、斷詞、詞性標記、字型還原、停用詞…等處理，處理完數據後則可以開始進行數據分析，本組採用 Scikit-Learn 及 keras 來建立各式模型。</p>
+<h2 id="實作與評估方法"><a class="header-anchor" href="#實作與評估方法">¶</a>實作與評估方法</h2>
+<p>資料前處理及資料概況敘述詳見第三段落&quot;資料集敘述&quot;，本組以下列六種方式對資料集進行訓練、預測與分析：</p>
+<h3 id="1-樸素貝式分類器（Naive-Bayes-Classifier）"><a class="header-anchor" href="#1-樸素貝式分類器（Naive-Bayes-Classifier）">¶</a>1. 樸素貝式分類器（Naive Bayes Classifier）</h3>
+<p>Naive Bayes 模型所需要的參數較少，因此對於缺失資料較不敏感，本組使用之數據並無缺失值，適用此分類法，該模型分類準確率為 93.6%。其分類結果見圖八。</p>
+<p><img src="https://i.imgur.com/dAGbJQN.png" alt=""><br>
+圖八、Naive Bayes 分類結果</p>
+<h3 id="2-邏輯斯迴歸（Logistic-Regression）"><a class="header-anchor" href="#2-邏輯斯迴歸（Logistic-Regression）">¶</a>2. 邏輯斯迴歸（Logistic Regression）</h3>
+<p>Logistic Regression 的優點則在於資料的分佈不需要是線性，並且能夠得到該筆資料屬於不同類別的機率，再依據此機率進行分類。準確率為 95.5%，其訓練及分類結果見圖九。</p>
+<p><img src="https://i.imgur.com/tInNPFU.png" alt=""><br>
+圖九、Logistic Regression 分類結果</p>
+<h3 id="3-決策樹（Decision-Tree）"><a class="header-anchor" href="#3-決策樹（Decision-Tree）">¶</a>3. 決策樹（Decision Tree）</h3>
+<p>Decision Tree 的判斷方式是利用不同特徵值來判斷進行分類，前面我們已將除了評論外的其餘特徵利用 OneHotEncoding 的方式轉換為 0、1 數值，以利進行分支。此模型的準確率為 92.0%，分類結果見圖十。</p>
+<p><img src="https://i.imgur.com/NKxaRdE.png" alt=""><br>
+圖十、Decision Tree 分類結果</p>
+<h3 id="4-隨機森林（Random-Forest）"><a class="header-anchor" href="#4-隨機森林（Random-Forest）">¶</a>4. 隨機森林（Random Forest）</h3>
+<p>Random Forest 的好處在於是一個集成式的機器學習，有助於降低學習偏差或是過擬合(Overfitting)的狀況，其準確率為 95.7%。分類結果見圖十一。</p>
+<p><img src="https://i.imgur.com/qFOVGOC.png" alt=""><br>
+圖十一、Random Forest 分類結果</p>
+<h3 id="5-XGBoost"><a class="header-anchor" href="#5-XGBoost">¶</a>5. XGBoost</h3>
+<p>XGBoost 結合了 Bagging 和 Boosting 的優點，不僅可以避免過擬合，也能針對缺失值進行處理，預期可以有更好的訓練結果，然而模型準確率為 93.0%，不論是準確率或 AUC 值皆低於 Random Forest，分類結果見圖十二。</p>
+<p><img src="https://i.imgur.com/b9BtL13.png" alt=""><br>
+圖十二、XGBoost 分類結果</p>
+<h3 id="6-卷積神經網絡-CNN-長短期記憶模型-LSTM"><a class="header-anchor" href="#6-卷積神經網絡-CNN-長短期記憶模型-LSTM">¶</a>6. 卷積神經網絡(CNN) + 長短期記憶模型(LSTM)</h3>
+<p>在深度學習的部分，本組採用 CNN+LSTM 的組合，因所需輸入格式不同，將資料重新進行轉換，利用 CNN 來做特徵提取，在建立三層的 LSTM 層(各 256units、128units，見圖十三)來處理 input data，以利模型進行訓練及預測，此模型的準確率為 92.5%，分類結果見圖十四。<br>
+<img src="https://i.imgur.com/qPmvsB5.png" alt=""><br>
+&lt;圖十四、LSTM 分類結果&gt;</p>
+<p>可以看到以上六種預測方法，其準確率差異並不大，但本組在了解數據階段已發現，因大多數資料為正面評價(具資料不平衡)，因此在評估分析時，本組將以 AUC score 做為主要分析判斷依據。</p>
+<h2 id="流程"><a class="header-anchor" href="#流程">¶</a>流程</h2>
+<p>本組的實作流程如圖十五所示。首先進行探索式資料分析，掌握所使用資料集的重要特性，緊接著在資料前處理的階段移除 Stop Words、對文字進行 Tokenize 的動作，並將其與重要的屬性一併作分析。將前處理完的資料集拆分為訓練集與測試集後，建立分類預測模型並評估個模型的效能，以完成整個情緒分析的流程。</p>
+<p><img src="https://i.imgur.com/s2W4J36.png" alt=""><br>
+&lt;圖十五、情緒分析流程&gt;</p>
+<h2 id="分析結果與結論"><a class="header-anchor" href="#分析結果與結論">¶</a>分析結果與結論</h2>
+<h3 id="BenchMark-分析結果"><a class="header-anchor" href="#BenchMark-分析結果">¶</a>BenchMark 分析結果</h3>
+<p>表一、 BenchMark 分析結果</p>
+<table>
+<thead>
+<tr>
+<th>Model Evaluation</th>
+<th>Naive Bayes</th>
+<th>Logistic Regressiona</th>
+<th>Decision Tree</th>
+<th>Random Forest</th>
+<th>XGBoost</th>
+<th>CNN+LSTM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC</td>
+<td>0.7133</td>
+<td>0.7344</td>
+<td>🏆0.7888</td>
+<td>0.7265</td>
+<td>0.5618</td>
+<td>0.6881</td>
+</tr>
+<tr>
+<td>Accuracy</td>
+<td>0.9365</td>
+<td>0.9556</td>
+<td>0.9206</td>
+<td>🏆0.9571</td>
+<td>0.9302</td>
+<td>0.9254</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>0.9546</td>
+<td>0.9619</td>
+<td>🏆0.9683</td>
+<td>0.9588</td>
+<td>0.9355</td>
+<td>0.9477</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>0.9776</td>
+<td>0.9915</td>
+<td>0.9449</td>
+<td>🏆 0.9966</td>
+<td>0.9932</td>
+<td>0.9723</td>
+</tr>
+<tr>
+<td>F1-Score</td>
+<td>0.9660</td>
+<td>0.9765</td>
+<td>0.9564</td>
+<td>🏆 0.9773</td>
+<td>0.9635</td>
+<td>0.9599</td>
+</tr>
+</tbody>
+</table>
+<p>從 BenchMark 分析結果可以發現 Decision Tree 與 Random Forest 表現佳。此次資料集為不平衡資料集，因此在評估指標較看重 AUC score，然而從 BenchMark 分析結果發現 AUC score 皆沒有很高，所以後續本組以如何解決不平衡資料，使用 SMOTE 方法來解決並同時針對各模型進行參數調教作為特徵工程。</p>
+<h3 id="特徵工程分析結果"><a class="header-anchor" href="#特徵工程分析結果">¶</a>特徵工程分析結果</h3>
+<p>SMOTE(Synthetic Minority Oversampling Technique)：<br>
+如圖十六所示，最左邊為原始資料；中間圖深色的個體是被用來找 k-nearest neighbors 的陽性個體，此處假設我們選擇 k = 3，則對於這兩個點 SMOTE 演算法會先辨認出最近的 3 個鄰近點，接下來會隨機挑選其中 1 個鄰點用來產生新樣本，最後會在被挑到的個體與對應鄰點的連線上隨機產生一個新的個體，並當作這個個體是陽性的。當我們選擇了很多不同的個體去找出 k-nearest neighbors 以及合成新樣本後，最後會的結果會像右圖所示。<br>
+<img src="https://i.imgur.com/IKSdNnN.png" alt=""><br>
+圖十六、SMOTE 示意圖<br>
+SMOTE 在分類表現上通常可以給我們不錯的分類結果，但最大的缺點在於可能會讓算法對於「特徵重要性」失真。</p>
+<p>表二、特徵工程後分析結果(SMOTE oversampling, 調參數)</p>
+<table>
+<thead>
+<tr>
+<th>Model Evaluation</th>
+<th>Naive Bayes</th>
+<th>Logistic Regressiona</th>
+<th>Decision Tree</th>
+<th>Random Forest</th>
+<th>XGBoost</th>
+<th>CNN+LSTM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AUC</td>
+<td>0.8013</td>
+<td>🏆0.8574</td>
+<td>0.7914</td>
+<td>0.8027</td>
+<td>0.8140</td>
+<td>0.8042</td>
+</tr>
+<tr>
+<td>Accuracy</td>
+<td>0.8921</td>
+<td>🏆0.9302</td>
+<td>0.8857</td>
+<td>0.9127</td>
+<td>0.8222</td>
+<td>0.8333</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>0.9724</td>
+<td>🏆0.9822</td>
+<td>0.9742</td>
+<td>0.9732</td>
+<td>0.9816</td>
+<td>0.9759</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>0.9088</td>
+<td>🏆0.9420</td>
+<td>0.9010</td>
+<td>0.9315</td>
+<td>0.8236</td>
+<td>0.8391</td>
+</tr>
+<tr>
+<td>F1-Score</td>
+<td>0.9395</td>
+<td>🏆 0.9617</td>
+<td>0.9362</td>
+<td>0.9519</td>
+<td>0.8957</td>
+<td>0.9023</td>
+</tr>
+</tbody>
+</table>
+<p>根據最終結果，Logistic Regression 為表現最好模型獲得 AUC 分數最高，且每一個機器與深度模型經過 SMOTE 處理後 AUC 的分數皆提高。然而在 Accuracy 與 F1-score 分數皆降低。因此針對此次資料集，未來可朝向同時解決資料集不平衡與準確度下降等方向繼續研究探討，提升準確度與 AUC 分數。</p>
+<h2 id="參考文獻與資料"><a class="header-anchor" href="#參考文獻與資料">¶</a>參考文獻與資料</h2>
+<p>[1] Monika Kanojiya and Deepti Deepak Nikumbh, “Sentimental Analysis on Amazon’s Alexa Reviews using ML and DL approach: A Comparative study”, International Journal of Future Generation Communication and Networking,Vol. 13, No. 4, (2020), pp. 3177–3186.<br>
+[2] Practical ML Part 2: NLP on Amazon Alexa Reviews<br>
+[3] Sentiment-Analysis-on-Product-Reviews<br>
+[4] Topic Modeling and Sentiment Analysis on Amazon Alexa Reviews — Part II<br>
+[5] Alexa ,Whats your review ?<br>
+[6] 淺談機器學習的效能衡量指標 (2) – ROC/AUC 曲線<br>
+[7] 在 Python 中繪製 ROC 曲線</p>
+<h2 id="資料與程式存放-Data-and-code"><a class="header-anchor" href="#資料與程式存放-Data-and-code">¶</a>資料與程式存放 Data and code</h2>
+<p><a target="_blank" rel="noopener" href="https://www.kaggle.com/sid321axn/amazon-alexa-reviews">Alexa Data</a><br>
+<a target="_blank" rel="noopener" href="https://colab.research.google.com/drive/1F8CZlJb0SYvUt3wD8ec6xCxo4SG5yYyP">Code</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Sentimental-Analysis-On-Amazon%E2%80%99s-Alexa-Reviews/" rel="tag"># Sentimental Analysis On Amazon’s Alexa Reviews</a>
+              <a href="/tags/binary-classification/" rel="tag"># binary classification</a>
+              <a href="/tags/NLP/" rel="tag"># NLP</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/Kelly/fc4ed65/" rel="prev" title="資管所推甄心得 面試篇">
+      <i class="fa fa-chevron-left"></i> 資管所推甄心得 面試篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/Kelly/5e61b666/" rel="next" title="credit-fraud">
+      credit-fraud <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目錄
+        </li>
+        <li class="sidebar-nav-overview">
+          本站概要
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Summary"><span class="nav-number">1.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8B%95%E6%A9%9F"><span class="nav-number">2.</span> <span class="nav-text">動機</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E9%9B%86%E6%95%98%E8%BF%B0"><span class="nav-number">3.</span> <span class="nav-text">資料集敘述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Feedback-Rating-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 Feedback &amp; Rating 的處理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Variation-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 Variation 的處理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Length-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Length 的處理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-Verified-Review-%E7%9A%84%E8%99%95%E7%90%86"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 Verified_Review 的處理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%B7%A5%E5%85%B7"><span class="nav-number">4.</span> <span class="nav-text">分析工具</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%A6%E4%BD%9C%E8%88%87%E8%A9%95%E4%BC%B0%E6%96%B9%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">實作與評估方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A8%B8%E7%B4%A0%E8%B2%9D%E5%BC%8F%E5%88%86%E9%A1%9E%E5%99%A8%EF%BC%88Naive-Bayes-Classifier%EF%BC%89"><span class="nav-number">5.1.</span> <span class="nav-text">1. 樸素貝式分類器（Naive Bayes Classifier）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%82%8F%E8%BC%AF%E6%96%AF%E8%BF%B4%E6%AD%B8%EF%BC%88Logistic-Regression%EF%BC%89"><span class="nav-number">5.2.</span> <span class="nav-text">2. 邏輯斯迴歸（Logistic Regression）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%B1%BA%E7%AD%96%E6%A8%B9%EF%BC%88Decision-Tree%EF%BC%89"><span class="nav-number">5.3.</span> <span class="nav-text">3. 決策樹（Decision Tree）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%9A%A8%E6%A9%9F%E6%A3%AE%E6%9E%97%EF%BC%88Random-Forest%EF%BC%89"><span class="nav-number">5.4.</span> <span class="nav-text">4. 隨機森林（Random Forest）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-XGBoost"><span class="nav-number">5.5.</span> <span class="nav-text">5. XGBoost</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%8D%B7%E7%A9%8D%E7%A5%9E%E7%B6%93%E7%B6%B2%E7%B5%A1-CNN-%E9%95%B7%E7%9F%AD%E6%9C%9F%E8%A8%98%E6%86%B6%E6%A8%A1%E5%9E%8B-LSTM"><span class="nav-number">5.6.</span> <span class="nav-text">6. 卷積神經網絡(CNN) + 長短期記憶模型(LSTM)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E7%A8%8B"><span class="nav-number">6.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E7%B5%90%E6%9E%9C%E8%88%87%E7%B5%90%E8%AB%96"><span class="nav-number">7.</span> <span class="nav-text">分析結果與結論</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BenchMark-%E5%88%86%E6%9E%90%E7%B5%90%E6%9E%9C"><span class="nav-number">7.1.</span> <span class="nav-text">BenchMark 分析結果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%B5%E5%B7%A5%E7%A8%8B%E5%88%86%E6%9E%90%E7%B5%90%E6%9E%9C"><span class="nav-number">7.2.</span> <span class="nav-text">特徵工程分析結果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%83%E8%80%83%E6%96%87%E7%8D%BB%E8%88%87%E8%B3%87%E6%96%99"><span class="nav-number">8.</span> <span class="nav-text">參考文獻與資料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B3%87%E6%96%99%E8%88%87%E7%A8%8B%E5%BC%8F%E5%AD%98%E6%94%BE-Data-and-code"><span class="nav-number">9.</span> <span class="nav-text">資料與程式存放 Data and code</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kelly"
+      src="https://i.imgur.com/Y9m0rZb.jpg">
+  <p class="site-author-name" itemprop="name">Kelly</p>
+  <div class="site-description" itemprop="description">A good heart goes a long way.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">文章</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分類</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">標籤</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kelly</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 強力驅動
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://https-duck-tech-github-io.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://ducktech.me/Kelly/aab513d1/";
+    this.page.identifier = "Kelly/aab513d1/";
+    this.page.title = "Sentimental Analysis On Amazon’s Alexa Reviews";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://https-duck-tech-github-io.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
